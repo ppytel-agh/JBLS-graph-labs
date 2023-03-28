@@ -1,6 +1,14 @@
 from unittest import TestCase
+from test_utilities import assert_incidence_matrices_equal
+from test_utilities import assert_adjacency_lists_equal
 
 from matrix_encoding_conversions import convert_adjacency_matrix_to_incidence_matrix
+from matrix_encoding_conversions import convert_adjacency_matrix_to_adjacency_list
+from matrix_encoding_conversions import convert_incidence_matrix_to_adjacency_matrix
+from matrix_encoding_conversions import convert_incidence_matrix_to_adjacency_list
+from matrix_encoding_conversions import convert_adjacency_list_to_adjacency_matrix
+from matrix_encoding_conversions import convert_adjacency_list_to_incidence_matrix
+
 class Test(TestCase):
     adjacency_matrix = [
         [0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
@@ -17,18 +25,18 @@ class Test(TestCase):
         [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0]
     ]
     incidence_matrix = [
-      [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-      [0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
-      [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-      [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1]
+        [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+        [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1]
     ]
     adjacency_list = {
         1: [2, 5, 6],
@@ -44,45 +52,31 @@ class Test(TestCase):
         11: [4],
         12: [3, 8],
     }
-
-    def incidence_matrix_contains_edge(incidence_matrix, edge_nodes):
-        number_of_edges = len(incidence_matrix[0])
-        number_of_nodes = len(incidence_matrix)
-
-        for edge_index in range(number_of_edges):
-            nodes_found = 0
-            for node_index in range(number_of_nodes):
-                if node_index == edge_nodes[0] or node_index == edge_nodes[1]:
-                    nodes_found += 1
-                    if nodes_found == 2:
-                        return True
-
-        return False
-    def assertIncidenceMatricesEqual(self, expected, actual):
-        number_of_edges = len(expected[0])
-        number_of_nodes = len(expected)
-
-        if len(actual) != number_of_nodes:
-            raise AssertionError("number of nodes does not match")
-            return
-
-        if len(actual[0]) != number_of_edges:
-            raise AssertionError("number of deges does not match")
-            return
-
-        for edge_index in range(number_of_edges):
-            edge_nodes = []
-            for node_index in range(number_of_nodes):
-                if expected[node_index][edge_index] == 1:
-                    edge_nodes.append(node_index)
-
-            if not Test.incidence_matrix_contains_edge(actual, edge_nodes):
-                raise AssertionError("edge " + edge_index + " not found")
-
+    node_identifiers = list(range(1, 13))
 
     def test_convert_adjacency_matrix_to_incidence_matrix(self):
         actual_incidence_matrix = convert_adjacency_matrix_to_incidence_matrix(Test.adjacency_matrix)
-        self.assertIncidenceMatricesEqual(
+        assert_incidence_matrices_equal(
             Test.incidence_matrix,
             actual_incidence_matrix
         )
+
+    def test_convert_adjacency_matrix_to_adjacency_list(self):
+        actual_adjacency_list = convert_adjacency_matrix_to_adjacency_list(Test.adjacency_matrix, Test.node_identifiers)
+        assert_adjacency_lists_equal(Test.adjacency_list, actual_adjacency_list)
+
+    def test_convert_incidence_matrix_to_adjacency_matrix(self):
+        actual_adjacencya_matrix = convert_incidence_matrix_to_adjacency_matrix(Test.incidence_matrix)
+        self.assertEqual(Test.adjacency_matrix, actual_adjacencya_matrix)
+
+    def test_convert_incidence_matrix_to_adjacency_list(self):
+        actual_adjacency_list = convert_incidence_matrix_to_adjacency_list(Test.incidence_matrix, Test.node_identifiers)
+        assert_adjacency_lists_equal(Test.adjacency_list, actual_adjacency_list)
+
+    def test_convert_adjacency_list_to_adjacency_matrix(self):
+        actual_adjacency_matrix = convert_adjacency_list_to_adjacency_matrix(Test.adjacency_list)
+        self.assertEqual(Test.adjacency_matrix, actual_adjacency_matrix)
+
+    def test_convert_adjacency_list_to_incidence_matrix(self):
+        actual_incidence_matrix = convert_adjacency_list_to_incidence_matrix(Test.adjacency_list)
+        assert_incidence_matrices_equal(Test.incidence_matrix, actual_incidence_matrix)

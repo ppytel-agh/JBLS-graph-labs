@@ -29,7 +29,7 @@ def convert_adjacency_matrix_to_adjacency_list(adjacency_matrix, node_identifier
         node_identifier = node_identifiers[node_index]
         node_neighbors = []
         # skip the same index and already checked edges
-        for possible_adjacent_node_index in range(node_index + 1, number_of_nodes):
+        for possible_adjacent_node_index in range(number_of_nodes):
             if adjacency_matrix[node_index][possible_adjacent_node_index] == 1:
                 adjacent_node_identifier = node_identifiers[possible_adjacent_node_index]
                 node_neighbors.append(adjacent_node_identifier)
@@ -65,6 +65,7 @@ def convert_incidence_matrix_to_adjacency_matrix(incidence_matrix):
 
         adjacency_matrix.append(adjacency_matrix_row)
 
+    return adjacency_matrix
 
 def convert_incidence_matrix_to_adjacency_list(incidence_matrix, node_identifiers):
     number_of_nodes = len(incidence_matrix)
@@ -77,6 +78,8 @@ def convert_incidence_matrix_to_adjacency_list(incidence_matrix, node_identifier
         for edge_index in range(number_of_edges):
             if incidence_matrix[node_index][edge_index] == 1:
                 for possible_adjacent_node_index in range(number_of_nodes):
+                    if possible_adjacent_node_index == node_index:
+                        continue
                     if incidence_matrix[possible_adjacent_node_index][edge_index] == 1:
                         adjacent_node_identifier = node_identifiers[possible_adjacent_node_index]
                         node_neighbors.append(adjacent_node_identifier)

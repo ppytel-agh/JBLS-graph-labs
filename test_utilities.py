@@ -5,10 +5,11 @@ def incidence_matrix_contains_edge(incidence_matrix, edge_nodes):
     for edge_index in range(number_of_edges):
         nodes_found = 0
         for node_index in range(number_of_nodes):
-            if node_index == edge_nodes[0] or node_index == edge_nodes[1]:
-                nodes_found += 1
-                if nodes_found == 2:
-                    return True
+            if incidence_matrix[node_index][edge_index] == 1:
+                if node_index == edge_nodes[0] or node_index == edge_nodes[1]:
+                    nodes_found += 1
+                    if nodes_found == 2:
+                        return True
 
     return False
 
@@ -30,7 +31,7 @@ def compare_incidence_matrices(template, compared):
             if template[node_index][edge_index] == 1:
                 edge_nodes.append(node_index)
 
-        if not incidence_matrix_contains_edge(template, edge_nodes):
+        if not incidence_matrix_contains_edge(compared, edge_nodes):
             differences.append("edge ({}, {}) not found".format(edge_nodes[0], edge_nodes[1]))
 
     return differences

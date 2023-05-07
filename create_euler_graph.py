@@ -88,6 +88,7 @@ if __name__ == '__main__':
         is_connected = nx.is_connected(nx_graph)
         while not is_connected:
             nx_graph = random_simple_graph_with_degrees_sequence(graph)
+            is_connected = nx.is_connected(nx_graph)
         result = []
         adjacency_matrix = to_numpy_array(nx_graph)
         Euler(0)

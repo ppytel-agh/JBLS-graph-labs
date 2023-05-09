@@ -3,8 +3,7 @@
 import argparse
 import random
 import networkx as nx
-from networkx.convert_matrix import to_numpy_array
-from graphic_sequence import is_sequence_graphic
+from graphic_sequence import is_sequence_graphic, create_graph_from_sequence
 from script_common import draw_graph_on_circle
 
 def edge_switching(G, num_swaps):
@@ -24,49 +23,63 @@ def edge_switching(G, num_swaps):
             G.add_edge(a, c)
             G.add_edge(b, d)
 
-def random_simple_graph_with_degrees_sequence(degrees_sequence):
-    if not nx.is_graphical(degrees_sequence):
-        return None
-
-    G = nx.Graph(nx.havel_hakimi_graph(degrees_sequence))
-
-    num_swaps = len(G.edges())
-    edge_switching(G, num_swaps)
-
-    return G
-
-def is_valid_edge(G, u, v):
-    if len(list(G.neighbors(u))) == 1:
-        return True
+def is_bridge(G, u, v):
+    if G.number_of_edges(u, v) > 1:
+        return False
+    original_degree = {node: G.degree(node) for node in G.neighbors(u)}
     G.remove_edge(u, v)
-    is_connected = nx.is_connected(G)
+    visited = set()
+    dfs(u, G, visited)
+    is_bridge = len(visited) != sum(original_degree.values()) // 2
     G.add_edge(u, v)
-    return is_connected
+    return is_bridge
 
-def fleury_algorithm(G, node):
-    cycle = []
-    for neighbor in list(G.neighbors(node)):
-        if G.has_edge(node, neighbor) and is_valid_edge(G, node, neighbor):
-            G.remove_edge(node, neighbor)
-            cycle += fleury_algorithm(G, neighbor)
-    cycle.append(node)
-    return cycle
+def dfs(node, G, visited):
+    visited.add(node)
+    for neighbor in G.neighbors(node):
+        if neighbor not in visited:
+            dfs(neighbor, G, visited)
 
-def find_eulerian_cycle(G):
-    if not all(deg % 2 == 0 for _, deg in G.degree()):
-        print("Not a Euler graph")
-        return None
+def find_euler_cycle(G):
+    start_node = max(G.nodes(), key=lambda node: G.degree(node))
 
-    start_node = list(G.nodes())[0]
-    return fleury_algorithm(G.copy(), start_node)
+    euler_path = []
+    current_node = start_node
 
-def Euler(v):
-    for i in range(V_size):
-        while (adjacency_matrix[v][i] != 0):
-            adjacency_matrix[v][i] -= 1
-            adjacency_matrix[i][v] -= 1
-            Euler(i)
-    result.append(v)
+    while len(G.edges()) > 0:
+        next_node = None
+        neighbors = list(G.neighbors(current_node))
+        for neighbor in neighbors:
+            if not is_bridge(G, current_node, neighbor):
+                next_node = neighbor
+                break
+
+        if len(neighbors) == 0:
+            break
+
+        if next_node is None:
+            next_node = neighbors[0]
+
+        euler_path.append(str(current_node) + " -> " + str(next_node))
+        G.remove_edge(current_node, next_node)
+        current_node = next_node
+
+    return euler_path
+
+def largest_connected_component(G):
+    visited = set()
+    largest_component = set()
+    for node in G.nodes():
+        if node not in visited:
+            component = set()
+            dfs(node, G, component)
+            if len(component) > len(largest_component):
+                largest_component = component
+            visited.update(component)
+
+    largest_component_graph = G.subgraph(largest_component).copy()
+
+    return largest_component_graph
  
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -77,22 +90,27 @@ if __name__ == '__main__':
     if V_size > 2:
         max_graph_degree = (V_size - 1) // 2
         graph = []
+
         for i in range(V_size):
             graph.append(random.randint(1, max_graph_degree) * 2)
+
         while(not is_sequence_graphic(graph)):
             graph.clear()
             for i in range(V_size):
                 graph.append(random.randint(1, max_graph_degree) * 2)
-        print(graph)
-        nx_graph = random_simple_graph_with_degrees_sequence(graph)
-        is_connected = nx.is_connected(nx_graph)
+        print("Generated graph:", graph)
+
+        node_identifiers = list(range(0, V_size))
+        nx_graph = create_graph_from_sequence(graph, node_identifiers)
+        largest_component_graph = largest_connected_component(nx_graph)
+        is_connected = (len(nx_graph.nodes) == len(largest_component_graph.nodes))
         while not is_connected:
-            nx_graph = random_simple_graph_with_degrees_sequence(graph)
-            is_connected = nx.is_connected(nx_graph)
-        result = []
-        adjacency_matrix = to_numpy_array(nx_graph)
-        Euler(0)
-        print("Euler cycle:", result)
+            edge_switching(nx_graph, 1)
+            largest_component_graph = largest_connected_component(nx_graph)
+            is_connected = (len(nx_graph.nodes) == len(largest_component_graph.nodes))
+
+        euler_cycle = find_euler_cycle(nx_graph.copy())
+        print("Euler cycle:", euler_cycle)
         draw_graph_on_circle(nx_graph)
 
     else:

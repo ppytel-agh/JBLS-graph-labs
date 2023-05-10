@@ -39,7 +39,9 @@ def is_sequence_graphic(sequence_to_check):
 
 
 def create_graph_from_sequence(graphic_sequence, node_identifiers):
-    number_of_nodes = len(graphic_sequence)
+    if not is_sequence_graphic(graphic_sequence):
+        raise ValueError("Invalid graphic sequence!")
+
     nx_graph = nx.Graph()
     nx_graph.add_nodes_from(node_identifiers)
 
@@ -50,9 +52,10 @@ def create_graph_from_sequence(graphic_sequence, node_identifiers):
         keys = list(sorted_dict.keys())
         node_identifier = keys[0]
         biggest_degree = sorted_dict[node_identifier]
-        for adjacent_node_key_index in range(1, biggest_degree+1):
+        for adjacent_node_key_index in range(1, biggest_degree + 1):
             adjacent_node_identifier = keys[adjacent_node_key_index]
             nx_graph.add_edge(node_identifier, adjacent_node_identifier)
+            sorted_dict[adjacent_node_identifier] -= 1
 
         sorted_dict[node_identifier] = 0
         sorted_dict = dict(sorted(sorted_dict.items(), key=lambda x: x[1], reverse=True))
